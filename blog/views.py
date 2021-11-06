@@ -1,95 +1,82 @@
 from django.shortcuts import get_object_or_404, render
-from datetime import date
-from .models import Post
-
-#Dummy Data
-
-# all_posts = [
-#     {
-#         "slug":"hike-in-the-mountains",
-#         "image":"mountains.jpg",
-#         "author":"Harry Herdiana",
-#         "date":date(2021,12,10),
-#         "title":"Mountain Hiking",
-#         "excerpt":"This is the best view ever, I forget all of my problem when I stayed here",
-#         "content":"""
-#         Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-#         Nulla perferendis labore accusamus, totam assumenda ipsam at? 
-        
-#         Tempora, quisquam quaerat, voluptas odio iusto doloribus debitis sint ex
-#         recusandae eos accusamus maxime mollitia rerum! 
-#         Perferendis ex, eius qui harum enim ut libero illum expedita iste fugit facilis laboriosam modi, quam aut deleniti.
-#         """
-#     },
-#         {
-#         "slug":"programming-is-fun",
-#         "image":"coding.jpg",
-#         "author":"Harry Herdiana",
-#         "date":date(2021,10,25),
-#         "title":"Programming is Great",
-#         "excerpt":"One of the challenging yet rewarding skills is Programming, many failed and many success on this field.",
-#         "content":"""
-#         Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-#         Nulla perferendis labore accusamus, totam assumenda ipsam at? 
-        
-#         Tempora, quisquam quaerat, voluptas odio iusto doloribus debitis sint ex
-#         recusandae eos accusamus maxime mollitia rerum! 
-#         Perferendis ex, eius qui harum enim ut libero illum expedita iste fugit facilis laboriosam modi, quam aut deleniti.
-#         """
-#     },
-#         {
-#         "slug":"fresh-mountain-landscape",
-#         "image":"woods.jpg",
-#         "author":"Harry Herdiana",
-#         "date":date(2022,5,12),
-#         "title":"Foresting",
-#         "excerpt":"Breathe deep the fresh air, escape the pollution of the City to the nature",
-#         "content":"""
-#         Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-#         Nulla perferendis labore accusamus, totam assumenda ipsam at? 
-        
-#         Tempora, quisquam quaerat, voluptas odio iusto doloribus debitis sint ex
-#         recusandae eos accusamus maxime mollitia rerum! 
-#         Perferendis ex, eius qui harum enim ut libero illum expedita iste fugit facilis laboriosam modi, quam aut deleniti.
-#         """
-#     },
-#      {
-#         "slug":"mountain-biking",
-#         "image":"mountain-biking.jpeg",
-#         "author":"Harry Herdiana",
-#         "date":date(2022,2,10),
-#         "title":"Mountain Biking",
-#         "excerpt":"Rush your adrenaline with the most scenic view on the deep of mountain forest!",
-#         "content":"""
-#         Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-#         Nulla perferendis labore accusamus, totam assumenda ipsam at? 
-        
-#         Tempora, quisquam quaerat, voluptas odio iusto doloribus debitis sint ex
-#         recusandae eos accusamus maxime mollitia rerum! 
-#         Perferendis ex, eius qui harum enim ut libero illum expedita iste fugit facilis laboriosam modi, quam aut deleniti.
-#         """
-#     },
-        
-# ]
-new_all_posts = Post.objects.all().order_by("date")
+from django.http import HttpResponseRedirect
+from .models import Comment, Post
+from django.views.generic.base import TemplateView
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import FormView, CreateView
+from .forms import CommentForm
+from django.views import View
+from django.urls import reverse
 
 
-def starting_page(request):
-    latest_posts = new_all_posts[0:2]
-    return render(request,"blog/index.html",{
-        "posts":latest_posts
-    })
+new_all_posts = Post.objects.all().order_by("-date")
 
-def posts(request):
-    return render(request,"blog/all_posts.html",{
-        "all_posts":new_all_posts
-    })
+# def starting_page(request):
+#     latest_posts = new_all_posts[0:2]
+#     return render(request,"blog/index.html",{
+#         "posts":latest_posts
+#     })
+
+class StartingPageView(TemplateView):
+    template_name = "blog/index.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["posts"]=new_all_posts[0:2]
+        return context
 
 
-def post_detail(request, slug):
-    # identified_post = next(post for post in new_all_posts if post['slug']== slug)
-    identified_post = get_object_or_404(Post,slug=slug)
-    print(identified_post)
-    return render(request,"blog/post_detail.html",{
-        "post":identified_post
-    })
+
+# def posts(request):
+#     return render(request,"blog/all_posts.html",{
+#         "all_posts":new_all_posts
+#     })
+
+
+class PostsView(ListView):
+    template_name = "blog/all_posts.html"
+    model=Post
+    ordering = ["-date"]
+    context_object_name = "all_posts"
+
+
+
+# def post_detail(request, slug):
+#     # identified_post = next(post for post in new_all_posts if post['slug']== slug)
+#     identified_post = get_object_or_404(Post,slug=slug)
+#     print(identified_post)
+#     return render(request,"blog/post_detail.html",{
+#         "post":identified_post
+#     })
+
+class PostDetailView(View):
+    def get(self,request,slug):
+        post = Post.objects.get(slug=slug)
+        context = {
+            "post":post,
+            "post_tags":post.tag.all(),
+            "comment_form":CommentForm
+        }
+        return render(request,"blog/post_detail.html",context)
+
+    def post(self,request,slug):
+        comment_form = CommentForm(request.POST)
+        post = Post.objects.get(slug=slug)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.save()
+            return HttpResponseRedirect(reverse("post_detail_page",args=[slug]))
+        context = {
+            "post":post,
+            "post_tags":post.tag.all(),
+            "comment_form":comment_form
+        } 
+        return render(request,"blog/post-detail.html",context)
+
+
+   
+
+# class CommentView(CreateView):
+#     form_class = CommentForm
+#     model = Comment
+#     template_name = "blog/post_detail.html"

@@ -6,21 +6,35 @@
 {% endblock title %}
 
 {% block css_files %}
-<link rel="stylesheet"
-      href="{% static 'blog/post_detail.css' %}">
-{% endblock css_files %}
+<link rel="stylesheet" href="{% static 'blog/post_detail.css' %}" />
+{% endblock css_files %} 
 {% block content %}
 <section id="summary">
-    <h2>{{post.title}}</h2>
-    <article>
-        <img src="{% static 'blog/images/'|add:post.image_name %}"
-             alt="Post Title">
-        <address>By {{post.author|title}}</address>
-        <div>Last Update on <time>{{post.date |date}}</time> </div>
-    </article>
+  <h2>{{post.title}}</h2>
+    <div>
+    {% for tag in post_tags %}
+      <span class="tag">{{ tag.caption }}</span>
+    {% endfor %}
+  </div>
+  <article>
+    <img src="{{post.image.url}}" alt="Post Title" />
+    <address>By {{post.author|title}}</address>
+    <div>Last Update on <time>{{post.date |date}}</time></div>
+  </article>
 </section>
 
-<main>
-{{post.content}}
-</main>
+<main>{{post.content|linebreaks}}</main>
+<div>
+  <section id="comment-form">
+    <h2>Your Comment</h2>
+    <form action="{% url "post_detail_page" post.slug %}">
+      {% csrf_token %} {% for form_field in comment_form %}
+      <div class="form-control">
+        {{form_field.label_tag}} {{form_field}} {{form_field.errors}}
+      </div>
+      {% endfor %}
+      <button>Add Comment</button>
+    </form>
+  </section>
+</div>
 {% endblock content %}
