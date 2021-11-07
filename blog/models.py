@@ -29,7 +29,7 @@ class Post(models.Model):
     content = models.TextField(validators=[MinLengthValidator(10)])
     tag = models.ManyToManyField(Tag)
     def __str__(self):
-        return f"{self.title} by {self.author}"
+        return f"{self.title}"
     def get_absolute_url(self):
         return reverse("post_detail_page", args=[self.slug])
 
@@ -39,3 +39,5 @@ class Comment(models.Model):
     user_email = models.EmailField()
     text = models.TextField(max_length=150)
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="comments")
+    def __str__(self):
+        return f"{self.user_name}"

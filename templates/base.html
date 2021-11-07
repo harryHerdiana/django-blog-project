@@ -18,7 +18,8 @@
 <header id="main-navigation">
     <h1><a href="{% url 'starting_page' %}">Harry's Blog</a></h1>
     <nav>
-        <a href="{% url 'posts_page' %}">All Post</a>
+        <a href="{% url 'posts_page' %}">All Posts</a>
+        <a href="{% url 'read_later' %}">Stored Posts</a>
     </nav>
 </header>
 {% block content %}{% endblock content %}
