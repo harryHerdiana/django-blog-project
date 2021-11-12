@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+import django_heroku
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,9 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '5+)$wauhl=i%le*td)hpxv)3jpbco2v01n+@wwy$_a#t_dn8+('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['harryherdiana-crm1.herokuapp.com']
 
 
 # Application definition
@@ -76,10 +78,21 @@ WSGI_APPLICATION = 'blog_exercise.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    'default':{
+        'ENGINE':'django.db.backends.postgresql_psycopg2',
+        'NAME':'d16p7e5n512l8n',
+        'USER':'veualzlnkdbyla',
+        'PASSWORD':'83e2868b2b4322a7b71a0ca7a9778eb6dc75c8ff51cf285b8dd80af47f78feb9',
+        'HOST':'ec2-3-225-30-189.compute-1.amazonaws.com',
+        'PORT':'5432'
     }
 }
 
@@ -121,7 +134,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 
-STATIC_ROOT = BASE_DIR+"/staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
@@ -130,3 +143,5 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = BASE_DIR+'/uploads'
 MEDIA_URL = '/files/'
+
+django_heroku.settings(locals())
