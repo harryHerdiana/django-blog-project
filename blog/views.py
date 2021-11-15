@@ -1,3 +1,4 @@
+from typing import List
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from .models import Comment, Post
@@ -9,16 +10,19 @@ from django.views import View
 from django.urls import reverse
 
 
-new_all_posts = Post.objects.all().order_by("-date")
+new_all_posts = Post.objects.all().order_by("date")
 
 
 
-class StartingPageView(TemplateView):
+class StartingPageView(ListView):
     template_name = "blog/index.html"
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["posts"]=new_all_posts[0:2]
-        return context
+    model = Post
+    ordering=["-date"]
+    context_object_name = "posts"
+    def get_queryset(self):
+        queryset= super().get_queryset()
+        data=queryset[:2]
+        return data
 
 
 class PostsView(ListView):

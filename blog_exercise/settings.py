@@ -81,8 +81,12 @@ WSGI_APPLICATION = 'blog_exercise.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dfhsppit50udp3',
+        'USER':'fyrkahllfeoaaq',
+        'PASSWORD':'df6705541e3c21fef29b9a5c99761fdfd74af881c38c787a9cded32011eaf778',
+        'HOST':'ec2-52-201-195-11.compute-1.amazonaws.com',
+        'PORT':'5432'
     }
 }
 
